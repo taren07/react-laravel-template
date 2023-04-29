@@ -3,6 +3,7 @@ version: "3"
 volumes:
   db-store:
 
+
 services:
   web-app:
     build:
@@ -10,10 +11,8 @@ services:
       dockerfile: ./docker/php-apache/local/Dockerfile
     ports:
       - "8080:80"
-    #    env_file:
-    #      - ./src/.env.dev.docker
     volumes:
-      - "./backend:/var/www/html"
+      - ./backend:/var/www/html
     networks:
       - net1
 
@@ -22,37 +21,32 @@ services:
       context: .
       dockerfile: ./docker/mysql/Dockerfile.dev
     ports:
-      - target: 3306
-        published: 3306
-        protocol: tcp
-        mode: host
+      - 3308:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=template-project
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=root
-      - MYSQL_TCP_PORT=3306
+      MYSQL_DATABASE: template-project
+      MYSQL_USER: template-project
+      MYSQL_PASSWORD: template-project
+      MYSQL_ROOT_PASSWORD: template-project
+      TZ: 'Asia/Tokyo'
     volumes:
       - type: volume
         source: db-store
         target: /var/lib/mysql
         volume:
           nocopy: true
-    #  env_file:
-    #    - ./src/.env
     networks:
       - net1
 
   phpmyadmin:
-    depends_on:
+    links:
       - db
     image: phpmyadmin/phpmyadmin
     platform: linux/amd64
     environment:
       - PMA_ARBITRARY=1
-      - PMA_HOST=db:3306
-      - PMA_USER=root
-      - PMA_PASSWORD=root
+      - PMA_HOST=db
+      - PMA_USER=template-project
+      - PMA_PASSWORD=template-project
     ports:
       - "18080:80"
     networks:
